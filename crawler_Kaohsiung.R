@@ -1,3 +1,18 @@
+# sessionInfo()
+# R version 3.3.2 (2016-10-31)
+# Platform: x86_64-apple-darwin13.4.0 (64-bit)
+# Running under: macOS Sierra 10.12.5
+# 
+# locale:
+#   [1] zh_TW.UTF-8/zh_TW.UTF-8/zh_TW.UTF-8/C/zh_TW.UTF-8/zh_TW.UTF-8
+# 
+# attached base packages:
+#   [1] stats     graphics  grDevices utils     datasets  methods  
+# [7] base     
+# 
+# loaded via a namespace (and not attached):
+#   [1] tools_3.3.2
+
 # install packages
 pkgs.needs <- c("XML", "dplyr", "stringr")
 pkgs.installed <- installed.packages()[,"Package"] 
