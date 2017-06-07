@@ -22,6 +22,11 @@ library(XML)      # readHTMLTable
 library(dplyr)    # data manipulation & pipe line
 library(stringr)  # str_pad
 
+# set working directory
+oriDir <- getwd()
+mainDir <- "/claenData"
+ifelse(!dir.exists(file.path(mainDir)), dir.create(file.path(mainDir)), FALSE)
+
 # define function
 getPop <- function(yy, mm) {
   domain <- "http://cabu.kcg.gov.tw/Web/"
@@ -30,7 +35,7 @@ getPop <- function(yy, mm) {
   tbn = names(tb)
   check = paste0("高雄市各區", yy, "年", mm, "月戶口數月統計")
   tb = tb %>% .[[1]] %>% transform(年月 = paste0(yy, '.', mm))
-  if(nrow(tb) > 1 & tbn == check) {return(tb)} else {stop("fail")}
+  if(nrow(tb) > 1 & tbn == check) {return(tb)} else {stop("Fail")}
 }
 
 # main proc
@@ -75,8 +80,7 @@ for(y in c(yy1:yy2)) {
   }
 }
 
-# check data
-df %>% head
-df %>% tail
-download_rec %>% head
-download_rec %>% tail
+# output data and restore env
+write.csv(df, "data_std_Kaohsiung.csv")
+write.csv(download_rec, "download_rec_Kaohsiung.csv")
+setwd(oriDir)
