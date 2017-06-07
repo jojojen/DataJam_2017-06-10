@@ -22,11 +22,6 @@ library(XML)      # readHTMLTable
 library(dplyr)    # data manipulation & pipe line
 library(stringr)  # str_pad
 
-# set working directory
-oriDir <- getwd()
-mainDir <- "/claenData"
-ifelse(!dir.exists(file.path(mainDir)), dir.create(file.path(mainDir)), FALSE)
-
 # define function
 getPop <- function(yy, mm) {
   domain <- "http://cabu.kcg.gov.tw/Web/"
@@ -42,15 +37,16 @@ getPop <- function(yy, mm) {
 ## init tables and progress bar
 yy1 <- 100  # start
 yy2 <- 106  # end
-df <- data.frame(區域名 = character(),
-                 里數 = integer(),
-                 鄰數 = integer(),
-                 戶數 = integer(),
-                 人口數 = integer(),
-                 男 = integer(),
-                 女 = integer(),
-                 年月 = character(),
-                 stringsAsFactors = FALSE)
+df <- data.frame()
+# df <- data.frame(區域名 = character(),
+#                  里數 = integer(),
+#                  鄰數 = integer(),
+#                  戶數 = integer(),
+#                  人口數 = integer(),
+#                  男 = integer(),
+#                  女 = integer(),
+#                  年月 = character(),
+#                  stringsAsFactors = FALSE)
 download_rec <- data.frame(ym = character(), status = character())
 allComb <- length(c(yy1:yy2)) * length(c(1:12))
 pb <- txtProgressBar(min = 0, max = allComb, init = 0, style = 3)
@@ -79,8 +75,8 @@ for(y in c(yy1:yy2)) {
     download_rec <- rbind(download_rec, rec)
   }
 }
+df = df %>% transform(地區 = "高雄市")
 
 # output data and restore env
 write.csv(df, "data_std_Kaohsiung.csv")
 write.csv(download_rec, "download_rec_Kaohsiung.csv")
-setwd(oriDir)
