@@ -44,7 +44,7 @@ eCaps <- list(
     )
 )
 # set remote
-url= "http://pxweb.yunlin.gov.tw/Pxweb/Dialog/varval.asp?ma=Po0201A1A&ti=%A4g%A6a%AD%B1%BFn%A1B%B2{%A6%ED%A4%E1%BC%C6%A1B%A4H%A4f%B1K%AB%D7%A4%CE%A9%CA%A4%F1%A8%D2(%A6~)&path=../PXfile/CountyStatistics&lang=9&strList=L"
+url= "http://townweb.cyhg.gov.tw/pxweb/Dialog/varval.asp?ma=Po0301A1M&ti=%B9%C5%B8q%BF%A4%AD%AB%ADn%B2%CE%ADp%B8%EA%AE%C6%AEw%ACd%B8%DF%A8t%B2%CE&path=../PXfile/CountyStatistics&lang=9&Flag=Q"
 remDr <- remoteDriver(
   remoteServerAddr = "localhost", 
   port = 4444, 
@@ -64,7 +64,12 @@ webElem$clickElement()
 webElem <- remDr$findElement(value = "//input[@name='prntcb']") # print csv
 webElem$clickElement()
 fileName <- list.files()
-df <- readLines(fileName)
+df <- readLines(fileName[1])
+df <- read.delim(fileName[4])
+
+df <- readLines(file(fileName[4], encoding = "BIG5"))
+data <- read.csv(textConnection(df), header = TRUE, stringsAsFactors = FALSE)
+
 df
 # output data and restore env
 setwd(oriDir)
