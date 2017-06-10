@@ -10,7 +10,7 @@
 #   [1] stats     graphics  grDevices utils     datasets  methods   base     
 # 
 # other attached packages:
-#   [1] RSelenium_1.7.1       
+#   [1] RSelenium_1.7.1
 # 
 # loaded via a namespace (and not attached):
 #   [1] httr_1.2.1       R6_2.2.1         assertthat_0.2.0 tools_3.3.2     
@@ -20,7 +20,7 @@
 
 # set working directory
 oriDir <- getwd()
-seleniumDir <- "./seleniumDownload"
+seleniumDir <- "./seleniumDownload_chiyicity"
 ifelse(!dir.exists(file.path(seleniumDir)), dir.create(file.path(seleniumDir)), FALSE)
 setwd(seleniumDir)
 
@@ -48,7 +48,7 @@ eCaps <- list(
     )
 )
 # set remote
-url= "http://townweb.cyhg.gov.tw/pxweb/Dialog/varval.asp?ma=Po0201A1A&ti=%25B9%25C5%25B8q%25BF%25A4%25AD%25AB%25ADn%25B2%25CE%25ADp%25B8%25EA%25AE%25C6%25AEw%25ACd%25B8%25DF%25A8t%25B2%25CE&path=..%2FPXfile%2FCountyStatistics&lang=9&Flag=Q"
+url= "http://www.chiayi.gov.tw/pxweb2007P/Dialog/varval.asp?ma=Po0201A1A&ti=%B9%C5%B8q%A5%AB%AD%AB%ADn%B2%CE%ADp%B8%EA%AE%C6%AEw%ACd%B8%DF%A8t%B2%CE&path=../PXfile/CountyStatistics&lang=9&Flag=Q,_new"
 remDr <- remoteDriver(
   remoteServerAddr = "localhost", 
   port = 4444, 
@@ -67,7 +67,6 @@ webElem <- remDr$findElement(value = "//p/input")  # continue
 webElem$clickElement()
 webElem <- remDr$findElement(value = "//input[@name='prntcb']") # print csv
 webElem$clickElement()
-Sys.sleep(5)
 fileName <- list.files()
 df <- readLines(fileName, encoding = "BIG5") %>% iconv("big5", "utf8") 
 df2 <- df[5:length(df)-1]
@@ -84,7 +83,7 @@ df4$X2 <- df4$X2 %>% lapply(., rm.quot)
 df4$X2 <- df4$X2 %>% lapply(., rm.dig)
 df4 = df4 %>% transform(年月 = paste0(as.numeric(df4$X1) -1911, ".12"))
 colnames(df4) <- c("西元年","區域名","土地面積","里數",'鄰數',"戶數","人口數","男","女","戶量(人/戶)","人口密度","性別比(男/女)","年月")
-df4$地區 <- "嘉義縣"
+df4$地區 <- "嘉義市"
 df4$區域名 = df4$區域名 %>% as.character 
 df4$西元年 = df4$西元年 %>% as.character 
 df_std = df4 %>% .[, c("區域名","里數","鄰數","戶數","人口數","男","女","年月","地區")]
@@ -92,5 +91,5 @@ df_std = df4 %>% .[, c("區域名","里數","鄰數","戶數","人口數","男",
 # output data and restore env
 if (file.exists(fileName)) file.remove(fileName)
 setwd(oriDir)
-write.csv(df4, "data_full_Chiayi.csv")
-write.csv(df_std, "data_std_Chiayi.csv")
+write.csv(df4, "data_full_Chiayi_city.csv")
+write.csv(df_std, "data_std_Chiayi_city.csv")
