@@ -32,6 +32,10 @@ if(length(new.packages)) install.packages(new.pkgs)
 library(dplyr)     # data manipulation & pipe line
 library(RSelenium) # selenium
 
+# define function 
+rm.quot <- function(x) {x %>% gsub('"', '', .) %>% return}
+rm.dig <- function(x) {x %>% gsub('\\d', '', .) %>% return}
+
 # set download folder 
 downloadFolder <- getwd()
 eCaps <- list(
@@ -44,7 +48,7 @@ eCaps <- list(
     )
 )
 # set remote
-url= "http://townweb.cyhg.gov.tw/pxweb/Dialog/varval.asp?ma=Po0301A1M&ti=%B9%C5%B8q%BF%A4%AD%AB%ADn%B2%CE%ADp%B8%EA%AE%C6%AEw%ACd%B8%DF%A8t%B2%CE&path=../PXfile/CountyStatistics&lang=9&Flag=Q"
+url= "http://townweb.cyhg.gov.tw/pxweb/Dialog/varval.asp?ma=Po0201A1A&ti=%25B9%25C5%25B8q%25BF%25A4%25AD%25AB%25ADn%25B2%25CE%25ADp%25B8%25EA%25AE%25C6%25AEw%25ACd%25B8%25DF%25A8t%25B2%25CE&path=..%2FPXfile%2FCountyStatistics&lang=9&Flag=Q"
 remDr <- remoteDriver(
   remoteServerAddr = "localhost", 
   port = 4444, 
@@ -64,14 +68,28 @@ webElem$clickElement()
 webElem <- remDr$findElement(value = "//input[@name='prntcb']") # print csv
 webElem$clickElement()
 fileName <- list.files()
-df <- readLines(fileName[1])
-df <- read.delim(fileName[4])
+df <- readLines(fileName, encoding = "BIG5") %>% iconv("big5", "utf8") 
+df2 <- df[5:length(df)-1]
+df3 <- strsplit(df2, split=',', fixed=TRUE)
+for (i in c(1:length(df3))) {
+  if (df3[[i]][1] == '\" \"') {
+    df3[[i]][1] <- df3[[i-1]][1] 
+  }
+}
+df3.5 <- Filter(function(x) length(x) == 12, df3)
+df4 <- data.frame(matrix(unlist(df3.5), nrow=length(df3.5), byrow=T))
+df4$X1 <- df4$X1 %>% lapply(., rm.quot)
+df4$X2 <- df4$X2 %>% lapply(., rm.quot)
+df4$X2 <- df4$X2 %>% lapply(., rm.dig)
+df4 = df4 %>% transform(年月 = paste0(as.numeric(df4$X1) -1911, ".12"))
+colnames(df4) <- c("西元年","區域名","土地面積","里數",'鄰數',"戶數","人口數","男","女","戶量(人/戶)","人口密度","性別比(男/女)","年月")
+df4$地區 <- "嘉義縣"
+df4$區域名 = df4$區域名 %>% as.character 
+df4$西元年 = df4$西元年 %>% as.character 
+df_std = df4 %>% .[, c("區域名","里數","鄰數","戶數","人口數","男","女","年月","地區")]
 
-df <- readLines(file(fileName[4], encoding = "BIG5"))
-data <- read.csv(textConnection(df), header = TRUE, stringsAsFactors = FALSE)
-
-df
 # output data and restore env
+if (file.exists(fileName)) file.remove(fileName)
 setwd(oriDir)
-write.csv(df, "data_full_Chiayi.csv")
+write.csv(df4, "data_full_Chiayi.csv")
 write.csv(df_std, "data_std_Chiayi.csv")
