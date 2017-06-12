@@ -20,7 +20,7 @@
 
 # set working directory
 oriDir <- getwd()
-seleniumDir <- "./seleniumDownload_chiyicity"
+seleniumDir <- "./seleniumDownload"
 ifelse(!dir.exists(file.path(seleniumDir)), dir.create(file.path(seleniumDir)), FALSE)
 setwd(seleniumDir)
 
@@ -67,29 +67,28 @@ webElem <- remDr$findElement(value = "//p/input")  # continue
 webElem$clickElement()
 webElem <- remDr$findElement(value = "//input[@name='prntcb']") # print csv
 webElem$clickElement()
+Sys.sleep(5)
 fileName <- list.files()
-df <- readLines(fileName, encoding = "BIG5") %>% iconv("big5", "utf8") 
-df2 <- df[5:length(df)-1]
-df3 <- strsplit(df2, split=',', fixed=TRUE)
-for (i in c(1:length(df3))) {
-  if (df3[[i]][1] == '\" \"') {
-    df3[[i]][1] <- df3[[i-1]][1] 
+df = readLines(fileName, encoding = "BIG5") %>% iconv("big5", "utf8") %>% 
+     .[5:length(.)-1] %>% strsplit(., split=',', fixed=TRUE)
+for (i in c(1:length(df))) {
+  if (df[[i]][1] == '\" \"') {
+    df[[i]][1] <- df[[i-1]][1] 
   }
 }
-df3.5 <- Filter(function(x) length(x) == 12, df3)
-df4 <- data.frame(matrix(unlist(df3.5), nrow=length(df3.5), byrow=T))
-df4$X1 <- df4$X1 %>% lapply(., rm.quot)
-df4$X2 <- df4$X2 %>% lapply(., rm.quot)
-df4$X2 <- df4$X2 %>% lapply(., rm.dig)
-df4 = df4 %>% transform(年月 = paste0(as.numeric(df4$X1) -1911, ".12"))
-colnames(df4) <- c("西元年","區域名","土地面積","里數",'鄰數',"戶數","人口數","男","女","戶量(人/戶)","人口密度","性別比(男/女)","年月")
-df4$地區 <- "嘉義市"
-df4$區域名 = df4$區域名 %>% as.character 
-df4$西元年 = df4$西元年 %>% as.character 
-df_std = df4 %>% .[, c("區域名","里數","鄰數","戶數","人口數","男","女","年月","地區")]
+df <- Filter(function(x) length(x) == 12, df)
+df <- data.frame(matrix(unlist(df), nrow=length(df), byrow=T)) %>%
+  lapply(., rm.quot) %>% as.data.frame
+df$X2 <- df$X2 %>% lapply(., rm.dig)
+df = df %>% transform(年月 = paste0(as.numeric(df$X1)-1911, ".12"))
+colnames(df) <- c("西元年","區域名","土地面積","里數",'鄰數',"戶數","人口數","男","女","戶量(人/戶)","人口密度","性別比(男/女)","年月")
+df$地區 <- "嘉義市"
+df$區域名 = df$區域名 %>% as.character 
+df$西元年 = df$西元年 %>% as.character 
+df_std = df %>% .[, c("區域名","里數","鄰數","戶數","人口數","男","女","年月","地區")]
 
 # output data and restore env
 if (file.exists(fileName)) file.remove(fileName)
 setwd(oriDir)
-write.csv(df4, "data_full_Chiayi_city.csv")
+write.csv(df, "data_full_Chiayi_city.csv")
 write.csv(df_std, "data_std_Chiayi_city.csv")
